@@ -1,5 +1,9 @@
 # Changelog for [`Win32` package](http://hackage.haskell.org/package/Win32)
 
+## 2.14.2.2 May 2026
+
+* Fix version bounds for older GHC and drop numeric underscore
+
 ## 2.14.2.1 June 2025
 
 * Fix compilation of `ReplaceFileW` on some GHC versions [#245](https://github.com/haskell/win32/issues/245)
