@@ -66,6 +66,9 @@ foreign import WINDOWS_CCONV unsafe "Shellapi.h CommandLineToArgvW"
 foreign import WINDOWS_CCONV unsafe "processenv.h GetCommandLineW"
         getCommandLineW :: IO LPWSTR
 
+foreign import WINDOWS_CCONV unsafe "shlwapi.h PathGetArgsW"
+        pathGetArgsW :: LPCWSTR -> IO LPWSTR
+
 foreign import WINDOWS_CCONV unsafe "processenv.h GetEnvironmentVariableW"
         c_GetEnvironmentVariableW :: LPCWSTR -> LPWSTR -> DWORD -> IO DWORD
 

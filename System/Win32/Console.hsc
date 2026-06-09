@@ -47,6 +47,7 @@ module System.Win32.Console (
         commandLineToArgv,
         getCommandLineW,
         getArgs,
+        getArgsNoExe,
         -- * Screen buffer
         CONSOLE_SCREEN_BUFFER_INFO(..),
         CONSOLE_SCREEN_BUFFER_INFOEX(..),
@@ -146,6 +147,10 @@ commandLineToArgv arg =
 getArgs :: IO [String]
 getArgs = do
   getCommandLineW >>= peekTString >>= commandLineToArgv
+
+getArgsNoExe :: IO [String]
+getArgsNoExe = do
+  getCommandLineW >>= pathGetArgsW >>= peekTString >>= commandLineToArgv
 
 getConsoleScreenBufferInfo :: HANDLE -> IO CONSOLE_SCREEN_BUFFER_INFO
 getConsoleScreenBufferInfo h = alloca $ \ptr -> do

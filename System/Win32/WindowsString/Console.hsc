@@ -44,6 +44,7 @@ module System.Win32.WindowsString.Console (
         commandLineToArgv,
         getCommandLineW,
         getArgs,
+        getArgsNoExe,
         -- * Screen buffer
         CONSOLE_SCREEN_BUFFER_INFO(..),
         CONSOLE_SCREEN_BUFFER_INFOEX(..),
@@ -68,7 +69,7 @@ module System.Win32.WindowsString.Console (
 import System.Win32.WindowsString.Types
 import System.Win32.WindowsString.String (withTStringBufferLen)
 import System.Win32.Console.Internal
-import System.Win32.Console hiding (getArgs, commandLineToArgv, getEnv, getEnvironment)
+import System.Win32.Console hiding (getArgs, getArgsNoExe, commandLineToArgv, getEnv, getEnvironment)
 import System.OsString.Windows
 import System.OsString.Internal.Types
 
@@ -115,6 +116,10 @@ commandLineToArgv arg
 getArgs :: IO [WindowsString]
 getArgs = do
   getCommandLineW >>= peekTString >>= commandLineToArgv
+
+getArgsNoExe :: IO [WindowsString]
+getArgsNoExe = do
+  getCommandLineW >>= pathGetArgsW >>= peekTString >>= commandLineToArgv
 
 
 -- c_GetEnvironmentVariableW :: LPCWSTR -> LPWSTR -> DWORD -> IO DWORD
