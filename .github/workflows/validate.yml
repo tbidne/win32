@@ -50,3 +50,6 @@ jobs:
 
       - name: Validate build
         run: cabal build
+
+      - name: Unit tests
+        run: cabal test unit
