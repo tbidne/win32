@@ -45,6 +45,7 @@ module System.Win32.WindowsString.Console (
         getCommandLineW,
         getArgs,
         getArgsNoExe,
+        getArgsStripped,
         -- * Screen buffer
         CONSOLE_SCREEN_BUFFER_INFO(..),
         CONSOLE_SCREEN_BUFFER_INFOEX(..),
@@ -73,11 +74,11 @@ import System.Win32.Console hiding (getArgs, getArgsNoExe, commandLineToArgv, ge
 import System.OsString.Windows
 import System.OsString.Internal.Types
 
-import Foreign.C.Types (CWchar)
-import Foreign.C.String (CWString)
-import Foreign.Ptr (plusPtr)
+import Foreign.C.Types (CInt, CWchar)
+import Foreign.C.String (CString, CWString)
+import Foreign.Ptr (Ptr, plusPtr)
 import Foreign.Storable (Storable(..))
-import Foreign.Marshal.Array (peekArray, peekArray0)
+import Foreign.Marshal.Array (advancePtr, peekArray, peekArray0)
 import Foreign.Marshal.Alloc (alloca)
 import GHC.IO (bracket)
 import GHC.IO.Exception (IOException(..), IOErrorType(OtherError))
@@ -87,6 +88,7 @@ import qualified Prelude as P
 
 #if !MIN_VERSION_filepath(1,5,0)
 import Data.Coerce
+import qualified "filepath" System.OsPath.Data.ByteString.Short as BSS
 import qualified "filepath" System.OsPath.Data.ByteString.Short.Word16 as BC
 
 tail :: WindowsString -> WindowsString
@@ -94,6 +96,8 @@ tail = coerce BC.tail
 
 break :: (WindowsChar -> Bool) -> WindowsString -> (WindowsString, WindowsString)
 break = coerce BC.break
+#else
+import qualified "os-string" System.OsString.Data.ByteString.Short as BSS
 #endif
 
 
@@ -121,6 +125,17 @@ getArgsNoExe :: IO [WindowsString]
 getArgsNoExe = do
   getCommandLineW >>= pathGetArgsW >>= peekTString >>= commandLineToArgv
 
+getArgsStripped :: IO [WindowsString]
+getArgsStripped =
+  alloca $ \ p_argc ->
+  alloca $ \ p_argv -> do
+   getProgArgv p_argc p_argv
+   p    <- fromIntegral <$> peek p_argc
+   argv <- peek p_argv
+   peekArray (p - 1) (advancePtr argv 1) >>= mapM (fmap WS . BSS.packCString)
+
+foreign import ccall unsafe "getProgArgv"
+  getProgArgv :: Ptr CInt -> Ptr (Ptr CString) -> IO ()
 
 -- c_GetEnvironmentVariableW :: LPCWSTR -> LPWSTR -> DWORD -> IO DWORD
 getEnv :: WindowsString -> IO (Maybe WindowsString)
