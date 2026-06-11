@@ -74,8 +74,9 @@ import System.Win32.Console hiding (getArgs, getArgsNoExe, commandLineToArgv, ge
 import System.OsString.Windows
 import System.OsString.Internal.Types
 
+import Data.Word (Word16)
 import Foreign.C.Types (CInt, CWchar)
-import Foreign.C.String (CString, CWString)
+import Foreign.C.String (CWString)
 import Foreign.Ptr (Ptr, plusPtr)
 import Foreign.Storable (Storable(..))
 import Foreign.Marshal.Array (advancePtr, peekArray, peekArray0)
@@ -132,10 +133,10 @@ getArgsStripped =
    getProgArgv p_argc p_argv
    p    <- fromIntegral <$> peek p_argc
    argv <- peek p_argv
-   peekArray (p - 1) (advancePtr argv 1) >>= mapM (fmap WS . BSS.packCString)
+   peekArray (p - 1) (advancePtr argv 1) >>= mapM (fmap WS . BC.packCWString)
 
 foreign import ccall unsafe "getProgArgv"
-  getProgArgv :: Ptr CInt -> Ptr (Ptr CString) -> IO ()
+  getProgArgv :: Ptr CInt -> Ptr (Ptr Word16) -> IO ()
 
 -- c_GetEnvironmentVariableW :: LPCWSTR -> LPWSTR -> DWORD -> IO DWORD
 getEnv :: WindowsString -> IO (Maybe WindowsString)
